@@ -32,8 +32,7 @@ export default class App extends Component {
     )
       .then(res => res.json())
       .then(json => {
-        console.log(json);
-        // setTimeout here to prevent flickering on fast connections, just a UX thing to make it seem smoother.
+        // prevent loading icon from flickering 
         setTimeout(() => {
           this.setState({
             temperature: Math.round(json.currently.temperature),
