@@ -1,12 +1,8 @@
-/**
- * Minimalist Weather App
- * Kudos to https://bit.ly/2vAmRbh
- */
-
-import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { API_KEY } from './utils/DarkSkyAPI';
-import Weather from './components/Weather';
+import React, { Component } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { API_KEY } from "./utils/DarkSkyAPI";
+import Weather from "./components/Weather";
+import styles from "./styles/app";
 
 export default class App extends Component {
   state = {
@@ -24,45 +20,48 @@ export default class App extends Component {
       },
       error => {
         this.setState({
-          error: 'Error Getting Weather Conditions'
+          error: "Error getting weather conditions."
         });
       }
     );
   }
 
-  fetchWeather(latitude = 25, longitude = 25) {
-    fetch (
+  fetchWeather(latitude, longitude) {
+    fetch(
       `https://api.darksky.net/forecast/${API_KEY}/${latitude},${longitude}`
     )
       .then(res => res.json())
       .then(json => {
         console.log(json);
-        this.setState({
-          temperature: Math.round(json.currently.temperature),
-          weather: json.minutely ? json.minutely.summary 
-            : json.currently.summary,
-          iconName: json.currently.icon,
-          isLoading: false
-        })
+        // setTimeout here to prevent flickering on fast connections, just a UX thing to make it seem smoother.
+        setTimeout(() => {
+          this.setState({
+            temperature: Math.round(json.currently.temperature),
+            weather: json.minutely
+              ? json.minutely.summary
+              : json.currently.summary,
+            iconName: json.currently.icon,
+            isLoading: false
+          });
+        }, 333);
       });
   }
 
   render() {
     const { isLoading, weather, temperature, iconName } = this.state;
-    
+
     return (
       <View style={styles.container}>
-        {isLoading ? <Text>Fetching the Weather</Text> 
-          : <Weather weather={weather} temperature={temperature} iconName={iconName} />
-        } 
+        {isLoading ? (
+          <ActivityIndicator size="small" color="#555" />
+        ) : (
+          <Weather
+            weather={weather}
+            temperature={temperature}
+            iconName={iconName}
+          />
+        )}
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff'
-  }
-});
